@@ -1,30 +1,40 @@
-const { buildSchema } = require('graphql');
-
-const schema = buildSchema(`
-  type Query {
-    hello: String
-    answer: Int
-  }
-  type Mutation {
-    incrementAnswer: Int
-    incrementAnswerBy5: Int
-  }
-
-`);
+const { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLInt } = require('graphql');
 
 let counter = 42;
 
-const rootValue = {
-  hello: () => 'world',
-  answer: () => counter,
-  incrementAnswer: () => {
-    counter += 1;
-    return counter;
-  },
-  incrementAnswerBy5: () => {
-    counter += 5;
-    return counter;
-  }
-};
+const schema = new GraphQLSchema({
+  query: new GraphQLObjectType({
+    name: 'Query',
+    fields: {
+      hello: {
+        type: GraphQLString,
+        resolve: () => 'world'
+      },
+      answer: {
+        type: GraphQLInt,
+        resolve: () => counter
+      }
+    }
+  }),
+  mutation: new GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+      incrementAnswer: {
+        type: GraphQLInt,
+        resolve: () => {
+          counter += 1;
+          return counter;
+        }
+      },
+      incrementAnswerBy5: {
+        type: GraphQLInt,
+        resolve: () => {
+          counter += 5;
+          return counter;
+        }
+      }
+    }
+  })
+});
 
-module.exports = { schema, rootValue };
+module.exports = { schema };
