@@ -8,8 +8,8 @@ const {
 
 let counter = 42;
 
-let counters = [
-  10, 40, 100
+const counters = [
+  { value: 10 }, { value: 40 }, { value: 100 }
 ];
 
 const CounterType = new GraphQLObjectType({
@@ -17,7 +17,7 @@ const CounterType = new GraphQLObjectType({
   fields: {
     value: {
       type: GraphQLInt,
-      resolve: _ => _ // info: I can avoid this if I like
+      resolve: _ => _.value
     }
   }
 });
@@ -34,7 +34,7 @@ const QueryType = new GraphQLObjectType({
       resolve: () => counter
     },
     counters: {
-      type: new GraphQLList(GraphQLInt),
+      type: new GraphQLList(CounterType),
       resolve: () => counters
     },
     counter: {
