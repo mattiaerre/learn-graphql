@@ -7,6 +7,9 @@ const {
 
 const CounterType = require('./Counter');
 const RestaurantType = require('./Restaurant');
+const CityType = require('./City');
+
+const { camelizeKeys } = require('humps');
 
 let counter = 42;
 
@@ -35,9 +38,18 @@ const QueryType = new GraphQLObjectType({
     },
     restaurants: {
       type: new GraphQLList(RestaurantType),
-      resolve: async (_, __, ctx) => {
+      resolve: async (_, __, ctx) => { // obj, args, context, excInfo
         const response = await ctx.pgPool.query('SELECT * FROM restaurants');
-        return response.rows;
+
+        return camelizeKeys(response.rows);
+      }
+    },
+    cities: {
+      type: new GraphQLList(CityType),
+      resolve: async (_, __, ctx) => { // obj, args, context, excInfo
+        const response = await ctx.pgPool.query('SELECT * FROM cities');
+
+        return camelizeKeys(response.rows);
       }
     },
     resCount: {
