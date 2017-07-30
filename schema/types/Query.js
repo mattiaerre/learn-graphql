@@ -38,8 +38,25 @@ const QueryType = new GraphQLObjectType({
     },
     restaurants: {
       type: new GraphQLList(RestaurantType),
-      resolve: async (_, __, ctx) => { // obj, args, context, excInfo
-        const response = await ctx.pgPool.query('SELECT * FROM restaurants');
+      args: {
+        search: {
+          type: GraphQLString, defaultValue: ''
+        },
+        limit: {
+          type: GraphQLInt, defaultValue: 200
+        },
+        after: {
+          type: GraphQLInt, defaultValue: 0
+        }
+      },
+      resolve: async (_, args, ctx) => { // obj, args, context, excInfo
+        const response = await ctx.pgPool.query(`
+        SELECT * FROM restaurants
+        WHERE lower(name) like $1
+        AND id > $3
+        LIMIT $2
+        `,
+          [`%${args.search.toLowerCase()}`, args.limit, args.after]);
 
         return camelizeKeys(response.rows);
       }
