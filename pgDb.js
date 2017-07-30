@@ -11,6 +11,14 @@ const pgDb = (pgPool) => {
       );
 
       return response.rows[0];
+    },
+    fetchCities: async (cityIds) => {
+      console.log(cityIds);
+      const response = await pgPool.query(`
+      SELECT * FROM cities WHERE id = ANY($1)
+      `, [cityIds]);
+
+      return response.rows;
     }
   };
 };

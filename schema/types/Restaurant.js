@@ -24,8 +24,11 @@ const RestaurantType = new GraphQLObjectType({
     city: {
       type: CityType,
       resolve: async (obj, __, ctx) => { // obj, args, context, excInfo
+        /*
         const response = await ctx.pgPool.query('SELECT * FROM cities WHERE id=$1', [obj.cityId]);
         return response.rows[0];
+        */
+        return ctx.loaders.cities.load(obj.cityId);
       }
     }
   }

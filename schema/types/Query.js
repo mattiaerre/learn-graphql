@@ -71,9 +71,12 @@ const QueryType = new GraphQLObjectType({
     },
     resCount: {
       type: GraphQLInt,
-      resolve: async (_, __, ctx) => {
+      resolve: (_, __, ctx) => {
+        /*
         const data = await ctx.mongoDb.collection('counters').find({}).toArray();
         return data[0].restaurants;
+        */
+        return ctx.loaders.counters.load();
       }
     }
   }

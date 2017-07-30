@@ -2,6 +2,10 @@ const express = require('express');
 const graphqlHTTP = require('express-graphql');
 const { schema, rootValue } = require('./schema/');
 
+const DataLoader = require('dataloader');
+
+const pgDb = require('./pgDb');
+
 const { Pool } = require('pg');
 const pgPool = new Pool();
 
@@ -15,12 +19,19 @@ MongoClient.connect(url, (err, db) => {
 
   const app = express();
 
-  app.use('/graphql', graphqlHTTP({
-    schema,
-    rootValue,
-    graphiql: true,
-    context: { pgPool, mongoDb: db }
-  }));
+  app.use('/graphql', (req, res) => {
+    const loaders = {
+      cities: new DataLoader(keys => pgDb(pgPool).fetchCities(keys)),
+      counters: new DataLoader(async () => db.collection('counters').find({}).toArray())
+    };
+
+    graphqlHTTP({
+      schema,
+      rootValue,
+      graphiql: true,
+      context: { pgPool, mongoDb: db, loaders }
+    })(req, res);
+  });
 
   app.listen(8000);
 });
