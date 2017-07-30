@@ -2,12 +2,25 @@ const express = require('express');
 const graphqlHTTP = require('express-graphql');
 const { schema, rootValue } = require('./schema/');
 
-const app = express();
+const { Pool } = require('pg');
+const pgPool = new Pool();
 
-app.use('/graphql', graphqlHTTP({
-  schema,
-  rootValue,
-  graphiql: true
-}));
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
 
-app.listen(8000);
+const url = 'mongodb://localhost:27017/forwardjs';
+
+MongoClient.connect(url, (err, db) => {
+  assert.equal(null, err);
+
+  const app = express();
+
+  app.use('/graphql', graphqlHTTP({
+    schema,
+    rootValue,
+    graphiql: true,
+    context: { pgPool, mongoDb: db }
+  }));
+
+  app.listen(8000);
+});
