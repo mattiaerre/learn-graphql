@@ -12,6 +12,8 @@ const counters = [
   { value: 10 }, { value: 40 }, { value: 100 }
 ];
 
+const { Pool } = require('pg');
+
 const CounterType = new GraphQLObjectType({
   name: 'CounterType',
   fields: {
@@ -21,6 +23,23 @@ const CounterType = new GraphQLObjectType({
     }
   }
 });
+
+const RestaurantType = new GraphQLObjectType({
+  name: 'RestaurantType',
+  fields: {
+    id: {
+      type: GraphQLInt
+    },
+    name: {
+      type: GraphQLString
+    },
+    address: {
+      type: GraphQLString
+    }
+  }
+});
+
+const pool = new Pool();
 
 const QueryType = new GraphQLObjectType({
   name: 'Query',
@@ -40,6 +59,13 @@ const QueryType = new GraphQLObjectType({
     counter: {
       type: CounterType,
       resolve: () => counter
+    },
+    restaurants: {
+      type: new GraphQLList(RestaurantType),
+      resolve: async () => {
+        const response = await pool.query('SELECT * FROM restaurants');
+        return response.rows;
+      }
     }
   }
 });
