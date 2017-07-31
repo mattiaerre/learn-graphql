@@ -2,12 +2,14 @@ const {
   GraphQLObjectType,
   GraphQLString,
   GraphQLInt,
-  GraphQLList
+  GraphQLList,
+  GraphQLUnionType
 } = require('graphql');
 
 const CounterType = require('./Counter');
 const RestaurantType = require('./Restaurant');
 const CityType = require('./City');
+const pgDb = require('../../pgDb');
 
 const { camelizeKeys } = require('humps');
 
@@ -78,7 +80,20 @@ const QueryType = new GraphQLObjectType({
         */
         return ctx.loaders.counters.load();
       }
-    }
+    },
+    resources: {
+      type: new GraphQLList(new GraphQLUnionType({
+        name: 'RestaurantOrCityType',
+        types: [RestaurantType, CityType],
+        resolveType(resource) {
+          return resource.type === 'city' ? CityType : RestaurantType;
+        }
+      })),
+      resolve: async (obj, args, { pgPool }) => {
+        const result = await pgDb(pgPool).fetchResources();
+        return result;
+      }
+    },
   }
 });
 
